@@ -113,14 +113,6 @@ function placeShips(grid, ships) {
 function startGame() {
     createGrid();
     placeShips(grid, ships);
-
-    for (let ship of ships) {
-        console.log(ship);
-        for (let index of ship.indices) {
-            grid.cells[index].innerHTML = ship.size;
-            console.log(index);
-        }
-    }
 }
 
 document.addEventListener('DOMContentLoaded', startGame);
