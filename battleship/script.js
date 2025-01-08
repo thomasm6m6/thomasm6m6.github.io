@@ -218,8 +218,6 @@ function placeShips(grid, ships) {
 function startGame() {
     createGrid();
     placeShips(grid, ships);
-<<<<<<< HEAD
-=======
     message("5 ships remaining");
 
     // for (let ship of ships) {
@@ -227,7 +225,6 @@ function startGame() {
     //         grid.cells[index].element.innerHTML = ship.size;
     //     }
     // }
->>>>>>> af0b7de (Updated battleship)
 }
 
 document.addEventListener('DOMContentLoaded', startGame);
