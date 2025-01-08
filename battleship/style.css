@@ -1,0 +1,78 @@
+html {
+    width: 100%;
+    height: 100%;
+}
+
+:root {
+    --bg-color: #161616;
+    --grid-bg: #333;
+    --cell-bg: #066;
+    --cell-border: #444;
+    --cell-hover: #3a3a3a;
+    --text-color: #eee;
+    --text-hover: #fff;
+    --version-color: #505050;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    font-family: monospace;
+}
+
+.content {
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
+    align-items: flex-end;
+    width: 428px;
+    padding: 10px;
+    margin: 0 auto;
+}
+
+h1 {
+    margin: 0;
+}
+
+.version {
+    font-size: 80%;
+    color: var(--version-color);
+}
+
+.moves {
+    display: flex;
+    align-items: center;
+    /* align-self: flex-end; */
+    margin-bottom: 2px;
+}
+
+.grid {
+    display: grid;
+    margin: auto;
+    width: 418px; /* 40px cell * 10 cols + 2px gap * 9 gaps */
+    grid-template-columns: repeat(10, 40px);
+    grid-template-rows: repeat(10, 40px);
+    gap: 2px;
+    background-color: var(--grid-bg);
+    padding: 8px;
+    border-radius: 4px;
+}
+
+.cell {
+    background-color: var(--cell-bg);
+    border: 1px solid var(--cell-border);
+    color: var(--text-color);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+}
+
+.cell:hover {
+    background-color: var(--cell-hover);
+    color: var(--text-hover);
+}
