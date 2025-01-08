@@ -13,12 +13,17 @@ TODO: warn if screen is not wide enough
     <div class="content">
         <div class="header">
             <h1>Battleship<span class="version"> v0.1</span></h1>
-            <div class="moves">
-                <span>Moves:&nbsp;</span>
-                <span id="moveCounter">0</span>
+            <div class="counter">
+                <span id="hitCounter">0</span>
+                &nbsp;hits&nbsp;/&nbsp;
+                <span id="missCounter">0</span>
+                &nbsp;misses
             </div>
         </div>
-        <div id="gameBoard" class="grid"></div>
+        <div id="board">
+            <div id="gameBoard" class="grid"></div>
+            <button id="replayButton" onclick="location.reload()">Restart</button>
+        </div>
     </div>
     <script src="script.js"></script>
 </body>
