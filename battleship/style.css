@@ -6,9 +6,10 @@ html {
 :root {
     --bg-color: #161616;
     --grid-bg: #333;
-    --cell-bg: #066;
+    /* --cell-bg: #066; */
+    --cell-bg: teal;
+    /* --cell-bg: #0066aa; */
     --cell-border: #444;
-    --cell-hover: #3a3a3a;
     --text-color: #eee;
     --text-hover: #fff;
     --version-color: #505050;
@@ -32,8 +33,13 @@ body {
     flex-direction: row;
     justify-content: space-between;
     align-items: flex-end;
-    width: 428px;
+    width: 411px; /* 40px cell * 10 cols + 8px padding * 2 - 5px */
     padding: 10px;
+    margin: 0 auto;
+}
+
+.rules {
+    width: 411px; /* 40px cell * 10 cols + 8px padding * 2 - 5px */
     margin: 0 auto;
 }
 
@@ -42,13 +48,19 @@ h1 {
 }
 
 .version {
-    font-size: 80%;
+    font-size: 75%;
     color: var(--version-color);
 }
 
-.counter {
+#status {
     display: flex;
-    align-items: center;
+    justify-content: center;
+    flex-direction: column;
+    align-items: flex-end;
+    margin-bottom: 2px;
+}
+
+#messageField {
     margin-bottom: 2px;
 }
 
@@ -56,10 +68,10 @@ h1 {
     position: relative;
     display: grid;
     margin: auto;
-    width: 418px; /* 40px cell * 10 cols + 2px gap * 9 gaps */
+    width: 400px; /* 40px cell * 10 cols */
     grid-template-columns: repeat(10, 40px);
     grid-template-rows: repeat(10, 40px);
-    gap: 2px;
+    /* gap: 2px; */
     background-color: var(--grid-bg);
     padding: 8px;
     border-radius: 4px;
@@ -75,17 +87,26 @@ h1 {
     cursor: pointer;
 }
 
-.cell:hover {
-    background-color: var(--cell-hover);
-    color: var(--text-hover);
-}
-
-.cell.hit {
+/* .cell.hit {
     background-color: var(--hit-cell-bg);
 }
 
 .cell.miss {
     background-color: var(--miss-cell-bg);
+} */
+
+.imageHit {
+    width: 75%;
+    height: 75%;
+    background-color: var(--hit-cell-bg);
+    border-radius: 50%;
+}
+
+.imageMiss {
+    width: 20%;
+    height: 20%;
+    background-color: var(--miss-cell-bg);
+    border-radius: 50%;
 }
 
 #replayButton {
@@ -111,4 +132,8 @@ h1 {
 #replayButton:hover {
     background-color: #e00;
     color: var(--text-hover);
+}
+
+li {
+    white-space-collapse: preserve;
 }

@@ -1,5 +1,4 @@
 // 'use strict' ?
-// TODO disable hover effect at end of game. might remove hover effect entirely, or at least make it *much* more subtle.
 
 class Cell {
     constructor(element) {
@@ -41,7 +40,7 @@ let ships = [
 // TODO put in top right corner, fade/slideout animation on timeout
 // Persist for maybe 3 seconds
 function message(string) {
-    alert(string);
+    document.querySelector('#messageField').innerHTML = string;
 }
 
 function doShot(event) {
@@ -98,66 +97,95 @@ function doShot(event) {
                     // cell.style.pointerEvents = 'none';
                 }
                 replayButton.style.display = 'unset';
-                return;
             }
-            message(`Sunk the ${theShip.name}!`);
+            if (!gameOver) message(`Sunk the ${theShip.name}!`);
             let sorted = theShip.indices.sort((a, b) => a - b);
             let first = sorted[0], last = sorted[sorted.length-1];
 
             if (theShip.isHorizontal) {
                 for (let i = first - grid.size - 1; i < last - grid.size + 2; i++) {
                     if (i >= 0 && i < 100) {
-                        grid.cells[i].element.classList.add('miss');
+                        const element = grid.cells[i].element;
+                        element.classList.add('miss');
+                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                     }
                 }
                 for (let i = first + grid.size - 1; i < last + grid.size + 2; i++) {
                     if (i >= 0 && i < 100) {
-                        grid.cells[i].element.classList.add('miss');
+                        const element = grid.cells[i].element;
+                        element.classList.add('miss');
+                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                     }
                 }
-                if (first - 1 >= 0) grid.cells[first-1].element.classList.add('miss');
-                if (last + 1 < 100) grid.cells[last+1].element.classList.add('miss');
+                if (first - 1 >= 0) {
+                    const element = grid.cells[first-1].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
+                }
+                if (last + 1 < 100) {
+                    const element = grid.cells[last+1].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
+                }
             } else {
                 for (const index of sorted) {
                     let indexBefore = index - 1;
                     let indexAfter = index + 1;
                     if (indexBefore >= 0 && indexBefore % grid.size != 9) {
-                        grid.cells[indexBefore].element.classList.add('miss');
+                        const element = grid.cells[indexBefore].element;
+                        element.classList.add('miss');
+                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                     }
                     if (indexAfter < 100 && indexAfter % grid.size != 0) {
-                        grid.cells[indexAfter].element.classList.add('miss');
+                        const element = grid.cells[indexAfter].element;
+                        element.classList.add('miss');
+                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                     }
                 }
 
                 let indexFirst = first - grid.size;
                 if (indexFirst >= 0) {
-                    grid.cells[indexFirst].element.classList.add('miss');
+                    const element = grid.cells[indexFirst].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                 }
                 if (indexFirst - 1 >= 0 && (indexFirst - 1) % grid.size != 9) {
-                    grid.cells[indexFirst - 1].element.classList.add('miss');
+                    const element = grid.cells[indexFirst - 1].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                 }
                 if (indexFirst + 1 >= 0 && (indexFirst + 1) % grid.size != 0) {
-                    grid.cells[indexFirst + 1].element.classList.add('miss');
+                    const element = grid.cells[indexFirst + 1].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                 }
 
                 let indexLast = last + grid.size;
                 if (indexLast >= 0) {
-                    grid.cells[indexLast].element.classList.add('miss');
+                    const element = grid.cells[indexLast].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                 }
                 if (indexLast - 1 && (indexLast - 1) % grid.size != 9) {
-                    grid.cells[indexLast - 1].element.classList.add('miss');
+                    const element = grid.cells[indexLast - 1].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                 }
-                if (indexLast + 1 && (indexLast + 1) && grid.size != 0) {
-                    grid.cells[indexLast + 1].element.classList.add('miss');
+                if (indexLast + 1 && (indexLast + 1) % grid.size != 0) {
+                    const element = grid.cells[indexLast + 1].element;
+                    element.classList.add('miss');
+                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
                 }
             }
         }
 
         element.classList.add('hit');
+        document.querySelector(`#cell-${id} > .imageHit`).style.display = 'unset';
         let hitCounter = document.querySelector('#hitCounter');
         hitCounter.innerHTML = Number(hitCounter.innerHTML) + 1;
     } else {
         element.classList.add('miss');
+        document.querySelector(`#cell-${id} > .imageMiss`).style.display = 'unset';
         let missCounter = document.querySelector('#missCounter');
         missCounter.innerHTML = Number(missCounter.innerHTML) + 1;
     }
@@ -166,15 +194,28 @@ function doShot(event) {
 }
 
 function createGrid() {
-    const gameBoard = document.getElementById('gameBoard');
+    // TODO don't add so many elements unnecessarily
+    const gameBoard = document.querySelector('.gameBoard');
 
     for (let i = 0; i < grid.size ** 2; i++) {
-        const element = document.createElement('div');
-        element.className = 'cell';
-        element.dataset.id = i;
-        element.addEventListener("click", doShot);
-        gameBoard.appendChild(element);
-        const cell = new Cell(element);
+        const cellDiv = document.createElement('div');
+        cellDiv.className = 'cell';
+        cellDiv.id = `cell-${i}`;
+        cellDiv.dataset.id = i;
+        cellDiv.addEventListener("click", doShot);
+        gameBoard.appendChild(cellDiv);
+
+        const hitDiv = document.createElement('div');
+        hitDiv.className = 'imageHit';
+        hitDiv.style.display = 'none';
+        cellDiv.appendChild(hitDiv);
+
+        const missDiv = document.createElement('div');
+        missDiv.className = 'imageMiss';
+        missDiv.style.display = 'none';
+        cellDiv.appendChild(missDiv);
+
+        const cell = new Cell(cellDiv);
         grid.cells.push(cell);
     }
 }
@@ -194,7 +235,6 @@ function placeShips(grid, ships) {
                 let increment = isHorizontal ? i : i*grid.size;
                 let index = start + increment;
                 for (existingIndex of allIndices) {
-                    console.log(existingIndex, index);
                     let xDiff = Math.abs(existingIndex%grid.size - index%grid.size);
                     let yDiff = Math.abs(Math.floor(existingIndex/grid.size) - Math.floor(index/grid.size));
                     if (xDiff < 2 && yDiff < 2) {
@@ -218,13 +258,12 @@ function placeShips(grid, ships) {
 function startGame() {
     createGrid();
     placeShips(grid, ships);
-    message("5 ships remaining");
 
-    // for (let ship of ships) {
-    //     for (let index of ship.indices) {
-    //         grid.cells[index].element.innerHTML = ship.size;
-    //     }
-    // }
+    for (let ship of ships) {
+        for (let index of ship.indices) {
+            // grid.cells[index].element.innerHTML = ship.size;
+        }
+    }
 }
 
 document.addEventListener('DOMContentLoaded', startGame);
