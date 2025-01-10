@@ -13,8 +13,9 @@ html {
     --text-color: #eee;
     --text-hover: #fff;
     --version-color: #505050;
+    --replay-button: #900;
 
-    --hit-cell-bg: #f00; /* TODO better red, to match green shade */
+    --hit-cell-bg: #900;
     --miss-cell-bg: #2a2a2a;
 }
 
@@ -118,7 +119,7 @@ h1 {
     transform: translate(-50%, -50%);
     z-index: 10;
     padding: 10px 20px;
-    background-color: #f00;
+    background-color: var(--replay-button);
     color: var(--text-color);
     border: 1px solid var(--cell-border);
     border-radius: 5px;

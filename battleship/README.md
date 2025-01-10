@@ -8,7 +8,8 @@ This section is intentionally left blank.
 
 ## TODO
 
+* Better hit/miss design (cracked effect?)
 * Mobile
 * Multiplayer
-* XR
+* XR/3d
 * AI

@@ -1,14 +1,12 @@
-// 'use strict' ?
+'use strict';
 
 class Cell {
-    constructor(element) {
+    constructor(element, index) {
         this.element = element;
-        this.hasShip = false;
         this.hasShot = false;
+        this.index = index;
     }
 }
-
-let gameOver = false;
 
 class Grid {
     constructor(size = 10) {
@@ -22,20 +20,13 @@ class Ship {
         this.name = name;
         this.size = size;
         this.sunk = false;
-        this.cells = [];
         this.indices = [];
     }
 }
 
-let grid = new Grid()
-
-let ships = [
-    new Ship("Carrier", 5),
-    new Ship("Battleship", 4),
-    new Ship("Cruiser", 3),
-    new Ship("Submarine", 3),
-    new Ship("Destroyer", 2)
-]
+let gameOver = false;
+let grid;
+let ships;
 
 // TODO put in top right corner, fade/slideout animation on timeout
 // Persist for maybe 3 seconds
@@ -43,159 +34,117 @@ function message(string) {
     document.querySelector('#messageField').innerHTML = string;
 }
 
+function setMiss(i) {
+    if (i < 0 || i >= 100) return;
+    registerMiss(grid.cells[i], false);
+}
+
+function markWon() {
+    message("You win!")
+    gameOver = true;
+    for (const cell of grid.cells) {
+        cell.element.tabIndex = -1;
+        // cell.style.pointerEvents = 'none';
+    }
+    const replayButton = document.querySelector('#replayButton');
+    replayButton.style.display = 'unset';
+}
+
+function markSunk(ship) {
+    ship.sunk = true;
+    if (ships.every(ship => ship.sunk)) {
+        markWon();
+    } else {
+        message(`Sunk the ${ship.name}`);
+    }
+    const first = ship.indices[0];
+    const last = ship.indices[ship.indices.length-1];
+
+    if (ship.isHorizontal) {
+        for (let i = first - grid.size; i <= last - grid.size; i++) {
+            setMiss(i);
+        }
+        for (let i = first + grid.size; i <= last + grid.size; i++) {
+            setMiss(i);
+        }
+        if (first % grid.size != 0) {
+            setMiss(first - 1);
+            setMiss(first - 1 - grid.size);
+            setMiss(first - 1 + grid.size);
+        }
+        if (last % grid.size != 9) {
+            setMiss(last + 1);
+            setMiss(last + 1 - grid.size);
+            setMiss(last + 1 + grid.size);
+        }
+    } else { // is vertical
+        for (const index of ship.indices) {
+            if (index % grid.size != 0) setMiss(index - 1);
+            if (index % grid.size != 9) setMiss(index + 1);
+        }
+
+        const indexFirst = first - grid.size;
+        const indexLast = last + grid.size;
+
+        setMiss(indexFirst);
+        setMiss(indexLast);
+
+        if (first % grid.size != 0) {
+            setMiss(indexFirst - 1);
+            setMiss(indexLast - 1);
+        }
+        if (first % grid.size != 9) {
+            setMiss(indexFirst + 1);
+            setMiss(indexLast + 1);
+        }
+    }
+}
+
+function registerHit(cell) {
+    cell.element.classList.add('hit');
+    document.querySelector(`#cell-${cell.index} > .imageHit`).style.display = 'unset';
+    const hitCounter = document.querySelector('#hitCounter');
+    hitCounter.innerHTML = Number(hitCounter.innerHTML) + 1;
+}
+
+function registerMiss(cell, incrementCounter=true) {
+    cell.element.classList.add('miss');
+    document.querySelector(`#cell-${cell.index} > .imageMiss`).style.display = 'unset';
+    if (incrementCounter) {
+        const missCounter = document.querySelector('#missCounter');
+        missCounter.innerHTML = Number(missCounter.innerHTML) + 1;
+    }
+}
+
 function doShot(event) {
     if (gameOver) return;
 
-    let element = event.currentTarget;
-    let id = element.dataset.id;
-    if (id === undefined) {
-        alert("error")
-    }
+    const element = event.currentTarget;
+    const id = Number(element.dataset.id);
+    const cell = grid.cells[id];
 
-    if (grid.cells[id].hasShot) {
+    if (cell.hasShot) {
         return;
     }
+    cell.hasShot = true;
 
-    let didHit = false;
-    let theShip
-    for (let ship of ships) {
-        if (ship.cells[id] !== undefined) {
-            didHit = true;
-            ship.cells[id].hasShot = true;
-            theShip = ship;
-            break;
-        }
-    }
-
-    if (didHit) {
-        let sunk = true;
-        for (let cell of theShip.cells) {
-            if (cell === undefined) {
-                continue;
-            }
-
-            if (!cell.hasShot) {
-                sunk = false;
-                break;
-            }
-        }
-        if (sunk) {
-            theShip.sunk = true;
-            let allSunk = true;
-            for (const ship of ships) {
-                if (!ship.sunk) {
-                    allSunk = false;
-                    break;
-                }
-            }
-            if (allSunk) {
-                message("You win!")
-                gameOver = true;
-                let replayButton = document.querySelector('#replayButton');
-                for (let cell of grid.cells) {
-                    cell.element.tabIndex = -1;
-                    // cell.style.pointerEvents = 'none';
-                }
-                replayButton.style.display = 'unset';
-            }
-            if (!gameOver) message(`Sunk the ${theShip.name}!`);
-            let sorted = theShip.indices.sort((a, b) => a - b);
-            let first = sorted[0], last = sorted[sorted.length-1];
-
-            if (theShip.isHorizontal) {
-                for (let i = first - grid.size - 1; i < last - grid.size + 2; i++) {
-                    if (i >= 0 && i < 100) {
-                        const element = grid.cells[i].element;
-                        element.classList.add('miss');
-                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                    }
-                }
-                for (let i = first + grid.size - 1; i < last + grid.size + 2; i++) {
-                    if (i >= 0 && i < 100) {
-                        const element = grid.cells[i].element;
-                        element.classList.add('miss');
-                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                    }
-                }
-                if (first - 1 >= 0) {
-                    const element = grid.cells[first-1].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-                if (last + 1 < 100) {
-                    const element = grid.cells[last+1].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-            } else {
-                for (const index of sorted) {
-                    let indexBefore = index - 1;
-                    let indexAfter = index + 1;
-                    if (indexBefore >= 0 && indexBefore % grid.size != 9) {
-                        const element = grid.cells[indexBefore].element;
-                        element.classList.add('miss');
-                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                    }
-                    if (indexAfter < 100 && indexAfter % grid.size != 0) {
-                        const element = grid.cells[indexAfter].element;
-                        element.classList.add('miss');
-                        document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                    }
-                }
-
-                let indexFirst = first - grid.size;
-                if (indexFirst >= 0) {
-                    const element = grid.cells[indexFirst].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-                if (indexFirst - 1 >= 0 && (indexFirst - 1) % grid.size != 9) {
-                    const element = grid.cells[indexFirst - 1].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-                if (indexFirst + 1 >= 0 && (indexFirst + 1) % grid.size != 0) {
-                    const element = grid.cells[indexFirst + 1].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-
-                let indexLast = last + grid.size;
-                if (indexLast >= 0) {
-                    const element = grid.cells[indexLast].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-                if (indexLast - 1 && (indexLast - 1) % grid.size != 9) {
-                    const element = grid.cells[indexLast - 1].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-                if (indexLast + 1 && (indexLast + 1) % grid.size != 0) {
-                    const element = grid.cells[indexLast + 1].element;
-                    element.classList.add('miss');
-                    document.querySelector(`#${element.id} .imageMiss`).style.display = 'unset';
-                }
-            }
+    const ship = ships.find(ship => ship.indices.includes(id));
+    if (ship) {
+        if (ship.indices.every(index => grid.cells[index].hasShot)) {
+            markSunk(ship);
         }
 
-        element.classList.add('hit');
-        document.querySelector(`#cell-${id} > .imageHit`).style.display = 'unset';
-        let hitCounter = document.querySelector('#hitCounter');
-        hitCounter.innerHTML = Number(hitCounter.innerHTML) + 1;
+        registerHit(cell);
     } else {
-        element.classList.add('miss');
-        document.querySelector(`#cell-${id} > .imageMiss`).style.display = 'unset';
-        let missCounter = document.querySelector('#missCounter');
-        missCounter.innerHTML = Number(missCounter.innerHTML) + 1;
+        registerMiss(cell);
     }
-
-    grid.cells[id].hasShot = true;
 }
 
-function createGrid() {
-    // TODO don't add so many elements unnecessarily
+function makeGrid() {
+    // TODO simplify this. can probably get away with one or two divs instead of
+    // three by using CSS classes correctly
     const gameBoard = document.querySelector('.gameBoard');
+    grid = new Grid();
 
     for (let i = 0; i < grid.size ** 2; i++) {
         const cellDiv = document.createElement('div');
@@ -215,55 +164,59 @@ function createGrid() {
         missDiv.style.display = 'none';
         cellDiv.appendChild(missDiv);
 
-        const cell = new Cell(cellDiv);
+        const cell = new Cell(cellDiv, i);
         grid.cells.push(cell);
     }
 }
 
-function placeShips(grid, ships) {
-    let allIndices = [];
-    for (let ship of ships) {
-        outer: while (true) {
-            let isHorizontal = Math.random() < 0.5;
-            let freeWidth = isHorizontal ? grid.size - ship.size : grid.size;
-            let freeHeight = isHorizontal ? grid.size : grid.size - ship.size;
-            let x = Math.floor(Math.random() * freeWidth);
-            let y = Math.floor(Math.random() * freeHeight);
-            let start = grid.size * y + x;
-            let indices = [];
-            for (i = 0; i < ship.size; i++) {
-                let increment = isHorizontal ? i : i*grid.size;
-                let index = start + increment;
-                for (existingIndex of allIndices) {
-                    let xDiff = Math.abs(existingIndex%grid.size - index%grid.size);
-                    let yDiff = Math.abs(Math.floor(existingIndex/grid.size) - Math.floor(index/grid.size));
-                    if (xDiff < 2 && yDiff < 2) {
-                        continue outer;
-                    }
-                }
-                indices.push(index);
-                ship.isHorizontal = isHorizontal;
-            }
-            for (const index of indices) {
-                allIndices.push(index);
-                grid.cells[index].hasShip = true;
-                ship.cells[index] = grid.cells[index];
-            }
-            ship.indices = indices;
-            break;
+function placeShip(ship) {
+    outer: while (true) {
+        const isHorizontal = Math.random() < 0.5;
+        const freeWidth = isHorizontal ? grid.size - ship.size : grid.size;
+        const freeHeight = isHorizontal ? grid.size : grid.size - ship.size;
+        const x = Math.floor(Math.random() * freeWidth);
+        const y = Math.floor(Math.random() * freeHeight);
+        const start = grid.size * y + x;
+        const indices = [];
+        for (let i = 0; i < ship.size; i++) {
+            const increment = isHorizontal ? i : i * grid.size;
+            const index = start + increment;
+            const doesFit = ships.every(ship => ship.indices.every(existingIndex => {
+                const xDiff = Math.abs(existingIndex % grid.size - index % grid.size);
+                const yDiff = Math.abs(Math.floor(existingIndex/grid.size) - Math.floor(index/grid.size));
+                return xDiff >= 2 || yDiff >= 2;
+            }));
+            if (!doesFit) continue outer;
+            indices.push(index);
+            ship.isHorizontal = isHorizontal;
         }
+        ship.indices = indices;
+        break;
+    }
+}
+
+function makeShips() {
+    ships = [
+        new Ship("Carrier", 5),
+        new Ship("Battleship", 4),
+        new Ship("Cruiser", 3),
+        new Ship("Submarine", 3),
+        new Ship("Destroyer", 2)    
+    ]
+    for (const ship of ships) {
+        placeShip(ship);
     }
 }
 
 function startGame() {
-    createGrid();
-    placeShips(grid, ships);
+    makeGrid();
+    makeShips();
 
-    for (let ship of ships) {
-        for (let index of ship.indices) {
-            // grid.cells[index].element.innerHTML = ship.size;
-        }
-    }
+    // for (const ship of ships) {
+    //     for (const index of ship.indices) {
+    //         grid.cells[index].element.style.background = 'blue';
+    //     }
+    // }
 }
 
 document.addEventListener('DOMContentLoaded', startGame);
