@@ -11,7 +11,7 @@
 </head>
 <body>
     <script type="module">
-        // Import necessary three.js modules
+        // Import three.js and its extensions from unpkg CDN
         import * as THREE from 'https://unpkg.com/three@0.160.0/build/three.module.js';
         import { GLTFLoader } from 'https://unpkg.com/three@0.160.0/examples/jsm/loaders/GLTFLoader.js';
         import { OrbitControls } from 'https://unpkg.com/three@0.160.0/examples/jsm/controls/OrbitControls.js';
@@ -37,6 +37,7 @@
         controls.enableDamping = true;
         controls.dampingFactor = 0.05;
 
+        // Load the GLB file (replace with your GLB URL)
         const loader = new GLTFLoader();
         const glbUrl = '/capybara.glb';
         loader.load(
